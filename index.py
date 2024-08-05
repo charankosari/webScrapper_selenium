@@ -12,25 +12,19 @@ def scrape_quotes(url, file_path):
     chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-
-    # Use WebDriver Manager to handle ChromeDriver
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-
     try:
         with open(file_path, 'w', encoding='utf-8') as file:
             while True:
                 driver.get(url)
                 
-                # Wait until quotes are loaded
                 WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CLASS_NAME, 'quote'))
                 )
 
-                # Get page source and parse with BeautifulSoup
                 page_source = driver.page_source
                 soup = BeautifulSoup(page_source, 'html.parser')
 
-                # Extract quotes data
                 quotes = soup.find_all('div', class_='quote')
 
                 for quote in quotes:
@@ -44,18 +38,17 @@ def scrape_quotes(url, file_path):
                     file.write("-" * 40 + "\n")
 
                 try:
-                    # Pagination: Go to next page
                     next_button = driver.find_element(By.CSS_SELECTOR, 'li.next > a')
                     if next_button:
                         next_page_url = next_button.get_attribute('href')
                         print(f"Next page URL: {next_page_url}")
-                        url = next_page_url  # Update URL to next page
+                        url = next_page_url 
                     else:
                         print("No more pages.")
-                        break  # Exit loop if no more pages
+                        break  
                 except Exception as e:
                     print(f"No more pages or error: {e}")
-                    break  # Exit loop if no more pages or an error occurs
+                    break  
 
     except Exception as e:
         print(f"An error occurred: {e}")
